@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js build output
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.venv/
+venv/
+env/
+ENV/
+
+# Large model data, checkpoints, datasets (>100MB)
+model/data/
+*.pth
+*.pt
+*.model
+*.model.pkl
+*.nii
+*.nii.gz
+*.npy
+*.npz
+
+# Backend temporary files
+backend/temp/input/*
+!backend/temp/input/.gitkeep
+backend/temp/output/*
+!backend/temp/output/.gitkeep
+
+# Environment variables
+.env
+.env*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
