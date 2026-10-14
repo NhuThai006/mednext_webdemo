@@ -37,6 +37,8 @@ backend/temp/input/*
 !backend/temp/input/.gitkeep
 backend/temp/output/*
 !backend/temp/output/.gitkeep
+backend/temp/cache/*
+!backend/temp/cache/.gitkeep
 
 # Environment variables
 .env

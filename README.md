@@ -1,36 +1,70 @@
 # MedNeXt Web Demo
 
-Hệ thống Web Demo phân đoạn tạng ổ bụng (Abdominal Organ Segmentation) từ ảnh CT dạng NIfTI (`.nii` / `.nii.gz`) sử dụng mô hình MedNeXt (nnU-Net backbone) huấn luyện trên bộ dữ liệu BTCV (14 classes: Background + 13 organs).
+Web demo phân đoạn tạng ổ bụng từ CT NIfTI (`.nii` / `.nii.gz`) bằng MedNeXt (nnU-Net), huấn luyện trên BTCV (nền + 13 tạng).
 
-## 🚀 Cấu trúc dự án
+- `backend/`: FastAPI, inference, cache kết quả, volume 3D cho trình duyệt.
+- `frontend/`: Next.js 16, Tailwind CSS. Vẽ lát cắt bằng canvas.
+- `model/`: kiến trúc MedNeXt và checkpoint. Không sửa khi chỉ chạy demo.
 
-- **`backend/`**: FastAPI backend xử lý API upload, inference model MedNeXt, sinh kết quả segmentation và render trực quan lát cắt CT.
-- **`frontend/`**: Next.js 16 (App Router) + Tailwind CSS + Lucide Icons cung cấp giao diện người dùng tương tác trực tiếp.
-- **`model/`**: Kiến trúc mô hình MedNeXt và nnUNet-MedNeXt wrapper.
+Backend tự gán `nnUNet_raw_data_base`, `nnUNet_preprocessed` và `RESULTS_FOLDER` trong `backend/config.py`. Không cần file env cho Python.
 
----
+## Yêu cầu
 
-## 🛠️ Hướng dẫn khởi chạy
+- Conda env `dip_web` (Python, PyTorch CUDA, các gói trong `backend/requirements.txt`).
+- Node.js và pnpm hoặc npm.
+- GPU NVIDIA. Máy demo dùng RTX 3050 6GB.
+- Checkpoint tại:
 
-### 1. Khởi động Backend (FastAPI)
-```bash
+`model/data/nnUNet_trained_models/nnUNet/3d_fullres/Task017_AbdominalOrganSegmentation/nnUNetTrainerV2_MedNeXt_S_kernel3__nnUNetPlansv2.1_trgSp_1x1x1/fold_0/`
+
+File trọng số trong fold là `model_best`.
+
+## File môi trường
+
+Frontend đọc URL backend từ `frontend/.env.local`.
+
+```powershell
+copy frontend\.env.example frontend\.env.local
+```
+
+Nội dung mặc định, khi API chạy trên cùng máy:
+
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+```
+
+Nếu backend ở máy khác, đổi thành `http://<IP>:8000`. Sau khi sửa file này, tắt `next dev` rồi chạy lại. Trình duyệt không nhận giá trị mới nếu chỉ lưu file khi server frontend vẫn đang chạy.
+
+`.env.local` không được commit. Mẫu nằm ở `frontend/.env.example`.
+
+## Chạy trên máy
+
+Mở hai terminal tại thư mục gốc repo `MedNeXt-webdemo`.
+
+**Terminal 1 — API**
+
+```powershell
 conda activate dip_web
 cd backend
-uvicorn main:app --host 0.0.0.0 --port 8000
+uvicorn main:app --host 127.0.0.1 --port 8000
 ```
-Backend API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-### 2. Khởi động Frontend (Next.js)
-Mở một terminal mới:
-```bash
+Đợi dòng `Application startup complete`. Kiểm tra [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health). Kết quả đúng có `"status": "ok"` và `"device": "cuda"`. Tài liệu API: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+Lệnh phải chạy trong `backend/`. Uvicorn import `main:app` từ thư mục đó.
+
+**Terminal 2 — giao diện**
+
+```powershell
 cd frontend
-npm install  # hoặc pnpm install
-npm run dev
+pnpm install
+pnpm dev
 ```
-Mở trình duyệt tại [http://localhost:3000](http://localhost:3000)
 
----
+Có thể dùng `npm install` rồi `npm run dev`. Mở [http://localhost:3000](http://localhost:3000).
 
-## 📋 Yêu cầu dữ liệu & Checkpoints
-Mô hình yêu cầu checkpoint đã huấn luyện đặt tại:
-`model/data/nnUNet_trained_models/nnUNet/3d_fullres/Task017_AbdominalOrganSegmentation/nnUNetTrainerV2_MedNeXt_S_kernel3__nnUNetPlansv2.1_trgSp_1x1x1/fold_0/`
+Upload một file CT `.nii` hoặc `.nii.gz`. Lần đầu chạy model có thể mất vài phút. Upload lại đúng file đó sẽ lấy kết quả từ `backend/temp/cache/`.
+
+Nếu trang báo không kết nối được `http://localhost:8000`, API ở terminal 1 chưa chạy hoặc đang tắt. Bật lại API rồi bấm Retry.
+
+Muốn máy khác trong mạng gọi API, đổi host thành `0.0.0.0` và trỏ `NEXT_PUBLIC_BACKEND_URL` tới IP của máy chạy backend.

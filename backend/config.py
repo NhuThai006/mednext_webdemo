@@ -20,6 +20,7 @@ CHECKPOINT = "model_best"
 
 TEMP_INPUT_DIR = os.path.join(BASE_DIR, "backend", "temp", "input")
 TEMP_OUTPUT_DIR = os.path.join(BASE_DIR, "backend", "temp", "output")
+TEMP_CACHE_DIR = os.path.join(BASE_DIR, "backend", "temp", "cache")
 
 # Organ is "present" only when it occupies more than this many voxels.
 PRESENT_VOXEL_MIN = 100
